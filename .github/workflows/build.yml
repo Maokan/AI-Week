@@ -33,10 +33,11 @@ jobs:
 
       - name: Build and Push image
         uses: docker/build-push-action@v5
+	run: |
+          docker build -t ghcr.io/maokan/ai-week:latest .
+          docker push ghcr.io/maokan/ai-week:latest
         with:
           context: .
           push: true
           tags: leaspeter/ai-week
-	run: |
-          docker build -t ghcr.io/maokan/ai-week:latest .
-          docker push ghcr.io/maokan/ai-week:latest
+
