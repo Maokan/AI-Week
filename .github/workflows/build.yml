@@ -18,7 +18,9 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   docker:
     runs-on: ubuntu-latest
-
+    permissions:
+     contents: read
+     packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,3 +37,6 @@ jobs:
           context: .
           push: true
           tags: leaspeter/ai-week
+	run: |
+          docker build -t ghcr.io/maokan/ai-week:latest .
+          docker push ghcr.io/maokan/ai-week:latest
