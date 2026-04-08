@@ -32,10 +32,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and Push image
-        uses: docker/build-push-action@v5
 	run: |
           docker build -t ghcr.io/maokan/ai-week:latest .
           docker push ghcr.io/maokan/ai-week:latest
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
