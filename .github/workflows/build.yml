@@ -37,4 +37,3 @@ jobs:
           context: .
           push: true
           tags: leaspeter/ai-week
-
