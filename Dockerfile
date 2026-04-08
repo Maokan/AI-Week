@@ -11,13 +11,13 @@ LABEL maintainer="dockerfile pour ai-week (enfin j'crois(pas sur mais j'suis qua
 WORKDIR /app
 
 # get informations about the project
-COPY ai-week/package.json ./
+COPY package.json ./
 
 # install NPM
 RUN npm install
 
 # get all the project's files
-COPY ai-week/ .
+COPY . .
 
 # use port 3000
 EXPOSE 3000
