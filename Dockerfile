@@ -1,26 +1,23 @@
 # Base Image
-FROM node:20-alpine
-
-#supplementary informations for image's metadata
-LABEL maintainer="dockerfile pour ai-week (enfin j'crois(pas sur mais j'suis quasi sur d'être sur que je crois))"
-
-# environement
-#ENV NODE_ENV=production
+FROM node:22-alpine
 
 # switch to the project, repertory
 WORKDIR /app
 
-# get informations about the project
-COPY package.json ./
+# get informations about the project (inclure yarn.lock est indispensable)
+COPY package.json yarn.lock* ./
 
-# install NPM
-RUN npm install
+# install NPM -> on remplace par YARN comme décidé
+RUN yarn install
 
 # get all the project's files
 COPY . .
 
-# use port 3000
-EXPOSE 3000
+# Générer le client Prisma pour la BDD (si on ne le fait pas, le backend crashe)
+RUN yarn prisma generate
+
+# use ports for Vite and Express
+EXPOSE 5173 3001
 
 # launch command
-CMD ["npm", "run","dev"] 
+CMD ["yarn", "run", "dev"] 

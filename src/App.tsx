@@ -1,6 +1,5 @@
-
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AppProvider } from './context/AppContext';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AppProvider, useAppContext } from './context/AppContext';
 import { Layout } from './components/Layout';
 
 // Pages
@@ -13,38 +12,48 @@ import { ProjectBoard } from './pages/ProjectBoard';
 import { Messages } from './pages/Messages';
 import { Assignments } from './pages/Assignments';
 import { Auth } from './pages/Auth';
-import { useAppContext } from './context/AppContext';
+import { Landing } from './pages/landing';
 
-const AppContent = () => {
+// Component to protect authenticated routes
+const ProtectedRoute = ({ element }: { element: JSX.Element }) => {
+  const { currentUser } = useAppContext();
+  return currentUser ? element : <Navigate to="/login" replace />;
+};
+
+const AppRoutes = () => {
   const { currentUser } = useAppContext();
 
-  if (!currentUser) {
-    return <Auth />;
-  }
-
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="grades" element={<Grades />} />
-          <Route path="schedule" element={<Schedule />} />
-          <Route path="courses" element={<Courses />} />
-          <Route path="documents" element={<Documents />} />
-          <Route path="projects" element={<ProjectBoard />} />
-          <Route path="messages" element={<Messages />} />
-          <Route path="assignments" element={<Assignments />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      {/* Public Pages */}
+      <Route path="/" element={currentUser ? <Navigate to="/dashboard" replace /> : <Landing />} />
+      <Route path="/login" element={currentUser ? <Navigate to="/dashboard" replace /> : <Auth />} />
+
+      {/* Protected Routes directly connected to Layout */}
+      <Route element={<ProtectedRoute element={<Layout />} />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/grades" element={<Grades />} />
+        <Route path="/schedule" element={<Schedule />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/documents" element={<Documents />} />
+        <Route path="/projects" element={<ProjectBoard />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/assignments" element={<Assignments />} />
+      </Route>
+
+      {/* Fallback route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 };
 
 function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <BrowserRouter>
+      <AppProvider>
+        <AppRoutes />
+      </AppProvider>
+    </BrowserRouter>
   );
 }
 

@@ -14,7 +14,7 @@ export const Layout = () => {
 
   const getNavItems = (role?: Role) => {
     const items = [
-      { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+      { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
       { path: '/messages', label: 'Messages', icon: <MessageSquare size={20} /> },
     ];
 
