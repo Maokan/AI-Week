@@ -3,20 +3,22 @@ import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { 
   GraduationCap, LayoutDashboard, Calendar, 
   Library, FolderOpen, KanbanSquare, MessageSquare, 
-  Settings, Users 
+  Settings, Users, LogOut
 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import type { Role } from '../context/AppContext';
 
 export const Layout = () => {
-  const { activeRole, setActiveRole, currentUser } = useAppContext();
+  const { currentUser, handleLogout } = useAppContext();
   const location = useLocation();
 
-  const getNavItems = (role: Role) => {
+  const getNavItems = (role?: Role) => {
     const items = [
       { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
       { path: '/messages', label: 'Messages', icon: <MessageSquare size={20} /> },
     ];
+
+    if (!role) return items;
 
     if (role === 'ELEVE') {
       items.push(
@@ -47,7 +49,7 @@ export const Layout = () => {
     return items;
   };
 
-  const navItems = getNavItems(activeRole);
+  const navItems = getNavItems(currentUser?.role);
 
   return (
     <div className="app-container">
@@ -92,18 +94,13 @@ export const Layout = () => {
           </div>
           
           <div className="topbar-actions">
-             <div className="role-switcher">
-               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Vue Demo:</span>
-               <select 
-                 value={activeRole} 
-                 onChange={(e) => setActiveRole(e.target.value as Role)}
-               >
-                 <option value="ELEVE">Élève</option>
-                 <option value="PO">Pedagogic Officer (PO)</option>
-                 <option value="TUTEUR">Tuteur</option>
-                 <option value="DIRECTION">Direction</option>
-               </select>
-             </div>
+             <button 
+                className="btn btn-outline" 
+                style={{ padding: '6px 12px', fontSize: '0.875rem' }} 
+                onClick={handleLogout}
+             >
+               <LogOut size={16} /> Déconnexion
+             </button>
           </div>
         </header>
 

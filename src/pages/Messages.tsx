@@ -6,9 +6,22 @@ export const Messages = () => {
   const { users, currentUser, messages, sendMessage } = useAppContext();
   const [activeContactId, setActiveContactId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const chatUsers = users.filter(u => u.id !== currentUser?.id);
-  const activeContact = chatUsers.find(u => u.id === activeContactId);
+  // 1. Get recent unique contacts from messages
+  const recentContactIds = Array.from(new Set(
+    messages
+      .filter(m => m.senderId === currentUser?.id || m.receiverId === currentUser?.id)
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .map(m => m.senderId === currentUser?.id ? m.receiverId : m.senderId)
+  )).slice(0, 10);
+
+  // 2. Compute displayed users based on searchQuery
+  const chatUsers = searchQuery.trim() !== ''
+    ? users.filter(u => u.id !== currentUser?.id && u.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : users.filter(u => recentContactIds.includes(u.id));
+
+  const activeContact = users.find(u => u.id === activeContactId);
 
   // Pour cet exo MOCK, on va récupérer tous les messages où le user courant est impliqué avec le contact actif, ou s'il n'y a pas de sélection on montre rien
   const thread = messages.filter(m => 
@@ -35,8 +48,23 @@ export const Messages = () => {
       <div className="chat-container">
         {/* Sidebar */}
         <div className="chat-sidebar">
-          <div className="chat-header">Contacts</div>
+          <div className="chat-header">Contacts récents {searchQuery.trim() !== '' && ' (Recherche globale)'}</div>
+          <div style={{ padding: '8px 16px', borderBottom: '1px solid var(--border-color)' }}>
+            <input 
+              type="text" 
+              placeholder="Chercher quelqu'un..." 
+              className="form-control" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ fontSize: '0.875rem', padding: '8px' }}
+            />
+          </div>
           <div style={{ overflowY: 'auto', flex: 1 }}>
+            {chatUsers.length === 0 && (
+               <div style={{ padding: '16px', fontSize: '0.875rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                 {searchQuery.trim() === '' ? 'Aucune conversation récente. Utilisez la recherche pour trouver un contact.' : 'Aucun résident trouvé.'}
+               </div>
+            )}
             {chatUsers.map(user => (
               <div 
                 key={user.id}

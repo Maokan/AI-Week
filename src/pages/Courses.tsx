@@ -3,10 +3,10 @@ import { useAppContext } from '../context/AppContext';
 import { FileText, Download, ExternalLink } from 'lucide-react';
 
 export const Courses = () => {
-  const { activeRole, courses, users, currentUser } = useAppContext();
+  const { courses, users, currentUser } = useAppContext();
 
   const getVisibleCourses = () => {
-    if (activeRole === 'PO') {
+    if (currentUser?.role === 'PO') {
        return courses.filter(c => c.poId === currentUser?.id);
     }
     // Eleves read all available courses in this mock
@@ -19,7 +19,7 @@ export const Courses = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 className="card-title" style={{ fontSize: '1.5rem', margin: 0 }}>Centralisation des Cours</h1>
-        {activeRole === 'PO' && (
+        {currentUser?.role === 'PO' && (
           <button className="btn btn-primary">
             + Ajouter un cours
           </button>

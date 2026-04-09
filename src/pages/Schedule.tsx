@@ -4,13 +4,13 @@ import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export const Schedule = () => {
-  const { activeRole, currentUser, schedule, courses, users, attendance, toggleAttendance } = useAppContext();
+  const { currentUser, schedule, courses, users, attendance, toggleAttendance } = useAppContext();
 
   const getSessions = () => {
-    if (activeRole === 'ELEVE') {
+    if (currentUser?.role === 'ELEVE') {
       return schedule.filter(s => s.classId === currentUser?.classId);
     }
-    if (activeRole === 'PO') {
+    if (currentUser?.role === 'PO') {
       return schedule.filter(s => s.poId === currentUser?.id);
     }
     return [];
@@ -59,7 +59,7 @@ export const Schedule = () => {
               </div>
 
               {/* Attendance System (Appel) */}
-              {activeRole === 'PO' && (
+              {currentUser?.role === 'PO' && (
                 <div>
                   <h4 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '8px' }}>Appel de la classe</h4>
                   <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
@@ -82,7 +82,7 @@ export const Schedule = () => {
                 </div>
               )}
               
-              {activeRole === 'ELEVE' && currentUser && (
+              {currentUser?.role === 'ELEVE' && currentUser && (
                 <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
                   <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Statut présence: </span>
                   {attendance.some(a => a.sessionId === session.id && a.studentId === currentUser.id) ? (

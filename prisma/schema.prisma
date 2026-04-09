@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  login     String   @unique
+  password  String
+  name      String
+  role      String   // ELEVE, PO, TUTEUR, DIRECTION
+  classId   String?
+
+  grades    Grade[]
+  documents Document[]
+  attendance Attendance[]
+
+  coursesGiven Course[]    @relation("CoursePO")
+  sessionsGiven ScheduleSession[] @relation("SessionPO")
+
+  sentMessages     Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+
+  createdAt DateTime @default(now())
+}
+
+model Course {
+  id        String   @id @default(uuid())
+  title     String
+  poId      String
+  po        User     @relation("CoursePO", fields: [poId], references: [id])
+  pdfUrl    String?
+
+  grades    Grade[]
+  sessions  ScheduleSession[]
+
+  createdAt DateTime @default(now())
+}
+
+model Grade {
+  id        String   @id @default(uuid())
+  studentId String
+  courseId  String
+  value     Float
+  comment   String?
+
+  student   User     @relation(fields: [studentId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model ScheduleSession {
+  id        String   @id @default(uuid())
+  courseId  String
+  startTime DateTime
+  endTime   DateTime
+  poId      String
+  classId   String
+
+  course    Course   @relation(fields: [courseId], references: [id])
+  po        User     @relation("SessionPO", fields: [poId], references: [id])
+
+  attendance Attendance[]
+}
+
+model Attendance {
+  id        String   @id @default(uuid())
+  sessionId String
+  studentId String
+  present   Boolean
+
+  session   ScheduleSession @relation(fields: [sessionId], references: [id])
+  student   User            @relation(fields: [studentId], references: [id])
+
+  @@unique([sessionId, studentId])
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  title      String
+  uploaderId String
+  url        String?
+  type       String   // UPLOAD, RESOURCE
+
+  uploader   User     @relation(fields: [uploaderId], references: [id])
+
+  createdAt  DateTime @default(now())
+}
+
+model ProjectTask {
+  id         String   @id @default(uuid())
+  title      String
+  status     String   // TODO, IN_PROGRESS, DONE
+  assigneeId String?
+
+  createdAt  DateTime @default(now())
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  content    String
+  timestamp  DateTime @default(now())
+
+  sender     User     @relation("MessageSender", fields: [senderId], references: [id])
+  receiver   User     @relation("MessageReceiver", fields: [receiverId], references: [id])
+}

@@ -2,21 +2,22 @@ import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 
 export const Grades = () => {
-  const { activeRole, currentUser, grades, courses, users, addGrade } = useAppContext();
+  const { currentUser, grades, courses, users, addGrade } = useAppContext();
   const [newGrade, setNewGrade] = useState({ studentId: '', courseId: '', value: '' });
 
   // ELEVE View
-  if (activeRole === 'ELEVE') {
+  if (currentUser?.role === 'ELEVE') {
     const myGrades = grades.filter(g => g.studentId === currentUser?.id);
-    const avg = myGrades.length ? myGrades.reduce((acc, curr) => acc + curr.value, 0) / myGrades.length : 0;
+    const avg = myGrades.length ? myGrades.reduce((acc, curr) => acc + curr.value, 0) / myGrades.length : null;
 
     return (
       <div>
         <h1 className="card-title">Mes Notes</h1>
+        <div className="card" style={{ background: 'var(--primary)', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ fontSize: '1.2rem', marginBottom: '8px' }}>Moyenne Générale</div>
+          <div style={{ fontSize: '3rem', fontWeight: 'bold' }}>{avg !== null ? avg.toFixed(2) : '--'}</div>
+        </div>
         <div className="card">
-          <p style={{ fontSize: '1.25rem', marginBottom: '16px' }}>
-            Moyenne Générale: <span className="badge badge-primary">{avg.toFixed(2)} / 20</span>
-          </p>
           <div className="table-container">
             <table className="table">
               <thead>
@@ -49,7 +50,7 @@ export const Grades = () => {
   }
 
   // PO View
-  if (activeRole === 'PO') {
+  if (currentUser?.role === 'PO') {
     const classStudents = users.filter(u => u.role === 'ELEVE' && u.classId === currentUser?.classId);
     
     const handleAdd = (e: React.FormEvent) => {

@@ -3,26 +3,26 @@ import { useAppContext } from '../context/AppContext';
 import { UploadCloud, File, Trash2 } from 'lucide-react';
 
 export const Documents = () => {
-  const { activeRole, currentUser, users } = useAppContext();
+  const { currentUser, users } = useAppContext();
   
   // Mocking isolated state for simplicity
   const [docs] = useState([
     { id: 'd1', title: 'Rapport_Final.pdf', uploaderId: 'u1', timestamp: new Date().toISOString() }
   ]);
 
-  if (activeRole === 'ELEVE' || activeRole === 'TUTEUR') {
-    const visibleDocs = activeRole === 'ELEVE' 
+  if (currentUser?.role === 'ELEVE' || currentUser?.role === 'TUTEUR') {
+    const visibleDocs = currentUser?.role === 'ELEVE' 
       ? docs.filter(d => d.uploaderId === currentUser?.id)
       : docs; // Tuteur voit tout dans ce mock basique
 
     return (
       <div>
         <h1 className="card-title" style={{ fontSize: '1.5rem', marginBottom: '24px' }}>
-          {activeRole === 'ELEVE' ? 'Mes documents déposés' : 'Dépôts des élèves'}
+          {currentUser?.role === 'ELEVE' ? 'Mes documents déposés' : 'Dépôts des élèves'}
         </h1>
 
         <div className="grid-cards">
-          {activeRole === 'ELEVE' && (
+          {currentUser?.role === 'ELEVE' && (
             <div className="card" style={{ borderStyle: 'dashed', borderWidth: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '200px', cursor: 'pointer' }}>
               <div style={{ background: 'var(--primary-light)', color: 'var(--primary)', padding: '16px', borderRadius: '50%', marginBottom: '16px' }}>
                 <UploadCloud size={32} />
@@ -45,7 +45,7 @@ export const Documents = () => {
                     Déposé par: {uploader?.name} le {new Date(doc.timestamp).toLocaleDateString('fr-FR')}
                   </p>
                 </div>
-                {activeRole === 'ELEVE' && (
+                {currentUser?.role === 'ELEVE' && (
                   <button className="btn btn-outline" style={{ color: 'var(--accent)', borderColor: 'var(--accent-light)' }}>
                     <Trash2 size={16} />
                   </button>

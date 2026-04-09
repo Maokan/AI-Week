@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
+import { Trash2 } from 'lucide-react';
 
 
 export const ProjectBoard = () => {
-  const { tasks, addTask, updateTaskStatus } = useAppContext();
+  const { tasks, addTask, updateTaskStatus, deleteTask } = useAppContext();
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
   const handleAdd = (e: React.FormEvent) => {
@@ -34,6 +35,9 @@ export const ProjectBoard = () => {
                   <button className="btn btn-outline" style={{ flex: 1, padding: '4px', fontSize: '0.75rem' }} onClick={() => updateTaskStatus(task.id, 'IN_PROGRESS')}>
                     Commencer
                   </button>
+                  <button className="btn btn-outline" style={{ padding: '4px', color: 'var(--danger, #dc3545)', borderColor: 'var(--danger-light, #f8d7da)' }} onClick={() => deleteTask(task.id)}>
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               </div>
             ))}
@@ -60,11 +64,14 @@ export const ProjectBoard = () => {
               <div className="kanban-card" key={task.id}>
                 <p style={{ fontWeight: 500, fontSize: '0.875rem', marginBottom: '12px' }}>{task.title}</p>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                   <button className="btn btn-outline" style={{ flex: 1, padding: '4px', fontSize: '0.75rem' }} onClick={() => updateTaskStatus(task.id, 'TODO')}>
+                 <button className="btn btn-outline" style={{ flex: 1, padding: '4px', fontSize: '0.75rem' }} onClick={() => updateTaskStatus(task.id, 'TODO')}>
                     Annuler
                   </button>
                   <button className="btn btn-primary" style={{ flex: 1, padding: '4px', fontSize: '0.75rem' }} onClick={() => updateTaskStatus(task.id, 'DONE')}>
                     Terminer
+                  </button>
+                  <button className="btn btn-outline" style={{ padding: '4px', color: 'var(--danger, #dc3545)', borderColor: 'var(--danger-light, #f8d7da)' }} onClick={() => deleteTask(task.id)}>
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
@@ -80,8 +87,15 @@ export const ProjectBoard = () => {
           </div>
           <div className="kanban-cards">
             {tasks.filter(t => t.status === 'DONE').map(task => (
-              <div className="kanban-card" key={task.id} style={{ opacity: 0.7 }}>
+              <div className="kanban-card" key={task.id} style={{ opacity: 0.7, position: 'relative' }}>
                 <p style={{ fontWeight: 500, fontSize: '0.875rem', textDecoration: 'line-through' }}>{task.title}</p>
+                <button 
+                  className="btn btn-outline" 
+                  style={{ position: 'absolute', top: '8px', right: '8px', padding: '4px', background: 'transparent', border: 'none', color: 'var(--danger, #dc3545)' }} 
+                  onClick={() => deleteTask(task.id)}
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
             ))}
           </div>

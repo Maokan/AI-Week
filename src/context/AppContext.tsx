@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 // Types
@@ -7,15 +7,16 @@ export type Role = 'ELEVE' | 'PO' | 'TUTEUR' | 'DIRECTION';
 export interface User {
   id: string;
   name: string;
+  login: string;
   role: Role;
-  classId?: string; // For ELEVE / PO
+  classId?: string;
 }
 
 export interface Grade {
   id: string;
   studentId: string;
   courseId: string;
-  value: number; // out of 20
+  value: number;
   comment?: string;
 }
 
@@ -29,13 +30,14 @@ export interface Course {
 export interface ScheduleSession {
   id: string;
   courseId: string;
-  startTime: string; // ISO String
+  startTime: string;
   endTime: string;
   poId: string;
   classId: string;
 }
 
 export interface Attendance {
+  id?: string;
   sessionId: string;
   studentId: string;
   present: boolean;
@@ -59,42 +61,13 @@ export interface ProjectTask {
 export interface Message {
   id: string;
   senderId: string;
-  receiverId: string; // Can be a 'GROUP_ID' or user 'ID'
+  receiverId: string;
   content: string;
   timestamp: string;
 }
 
-// Initial Mock Data
-const MOCK_USERS: User[] = [
-  { id: 'u1', name: 'Alice (Élève)', role: 'ELEVE', classId: 'c1' },
-  { id: 'u2', name: 'Bob (Élève)', role: 'ELEVE', classId: 'c1' },
-  { id: 'u3', name: 'M. Martin (PO)', role: 'PO', classId: 'c1' },
-  { id: 'u4', name: 'Mme. Dupont (Direction)', role: 'DIRECTION' },
-  { id: 'u5', name: 'Hugo (Tuteur)', role: 'TUTEUR' },
-];
-
-const MOCK_COURSES: Course[] = [
-  { id: 'crs1', title: 'Développement React', poId: 'u3', pdfUrl: '#react-pdf' },
-  { id: 'crs2', title: 'Design System & CSS', poId: 'u3', pdfUrl: '#css-pdf' },
-];
-
-const MOCK_GRADES: Grade[] = [
-  { id: 'g1', studentId: 'u1', courseId: 'crs1', value: 16 },
-  { id: 'g2', studentId: 'u1', courseId: 'crs2', value: 14.5 },
-  { id: 'g3', studentId: 'u2', courseId: 'crs1', value: 11 },
-];
-
-const MOCK_SCHEDULE: ScheduleSession[] = [
-  { id: 's1', courseId: 'crs1', startTime: '2026-04-10T09:00:00Z', endTime: '2026-04-10T11:00:00Z', poId: 'u3', classId: 'c1' },
-  { id: 's2', courseId: 'crs2', startTime: '2026-04-10T14:00:00Z', endTime: '2026-04-10T17:00:00Z', poId: 'u3', classId: 'c1' },
-];
-
-// Context Interface
 interface AppContextType {
-  activeRole: Role;
   currentUser: User | null;
-  setActiveRole: (role: Role) => void;
-  // Data
   users: User[];
   courses: Course[];
   grades: Grade[];
@@ -103,72 +76,195 @@ interface AppContextType {
   documents: Document[];
   tasks: ProjectTask[];
   messages: Message[];
-  // Actions
-  addGrade: (grade: Omit<Grade, 'id'>) => void;
-  toggleAttendance: (sessionId: string, studentId: string) => void;
-  addTask: (task: Omit<ProjectTask, 'id'>) => void;
-  updateTaskStatus: (taskId: string, status: ProjectTask['status']) => void;
-  sendMessage: (msg: Omit<Message, 'id' | 'timestamp'>) => void;
-  assignPoToClass: (poId: string, classId: string) => void;
+  
+  handleLogin: (login: string, pass: string) => Promise<void>;
+  handleRegister: (name: string, login: string, pass: string) => Promise<void>;
+  handleLogout: () => void;
+  updateUserRole: (userId: string, role: string) => Promise<void>;
+
+  addGrade: (grade: Omit<Grade, 'id'>) => Promise<void>;
+  toggleAttendance: (sessionId: string, studentId: string) => Promise<void>;
+  addTask: (task: Omit<ProjectTask, 'id'>) => Promise<void>;
+  updateTaskStatus: (taskId: string, status: ProjectTask['status']) => Promise<void>;
+  deleteTask: (taskId: string) => Promise<void>;
+  sendMessage: (msg: Omit<Message, 'id' | 'timestamp'>) => Promise<void>;
+  assignPoToClass: (poId: string, classId: string) => Promise<void>;
+  seedDb: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [activeRole, setActiveRole] = useState<Role>('ELEVE');
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem('currentUser');
+    return saved ? JSON.parse(saved) : null;
+  });
   
-  const [users, setUsers] = useState<User[]>(MOCK_USERS);
-  const [courses] = useState<Course[]>(MOCK_COURSES);
-  const [grades, setGrades] = useState<Grade[]>(MOCK_GRADES);
-  const [schedule] = useState<ScheduleSession[]>(MOCK_SCHEDULE);
+  const [users, setUsers] = useState<User[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
+  const [schedule, setSchedule] = useState<ScheduleSession[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [documents] = useState<Document[]>([]);
-  const [tasks, setTasks] = useState<ProjectTask[]>([
-    { id: 't1', title: 'Setup GitHub Repo', status: 'DONE' },
-    { id: 't2', title: 'Create Frontend Components', status: 'IN_PROGRESS' }
-  ]);
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 'm1', senderId: 'u3', receiverId: 'u1', content: 'N\'oubliez pas le rendu de vendredi.', timestamp: new Date().toISOString() }
-  ]);
+  const [tasks, setTasks] = useState<ProjectTask[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
-  const currentUser = users.find(u => u.role === activeRole) || users[0];
-
-  const addGrade = (grade: Omit<Grade, 'id'>) => {
-    setGrades(prev => [...prev, { ...grade, id: Date.now().toString() }]);
+  const fetchData = async () => {
+    try {
+      const [uRes, cRes, gRes, sRes, aRes, tRes, mRes] = await Promise.all([
+        fetch('/api/users'),
+        fetch('/api/courses'),
+        fetch('/api/grades'),
+        fetch('/api/schedule'),
+        fetch('/api/attendance'),
+        fetch('/api/tasks'),
+        fetch('/api/messages')
+      ]);
+      setUsers(await uRes.json());
+      setCourses(await cRes.json());
+      setGrades(await gRes.json());
+      setSchedule(await sRes.json());
+      setAttendance(await aRes.json());
+      setTasks(await tRes.json());
+      setMessages(await mRes.json());
+    } catch (e) {
+      console.error('Failed to fetch data', e);
+    }
   };
 
-  const toggleAttendance = (sessionId: string, studentId: string) => {
-    setAttendance(prev => {
-      const exists = prev.find(a => a.sessionId === sessionId && a.studentId === studentId);
-      if (exists) {
-        return prev.filter(a => !(a.sessionId === sessionId && a.studentId === studentId));
-      } else {
-        return [...prev, { sessionId, studentId, present: true }];
-      }
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      fetchData();
+    } else {
+      localStorage.removeItem('currentUser');
+    }
+  }, [currentUser]);
+
+  // Auth
+  const handleLogin = async (loginStr: string, pass: string) => {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login: loginStr, password: pass })
     });
+    if (!res.ok) throw new Error("Identifiants incorrects");
+    setCurrentUser(await res.json());
   };
 
-  const addTask = (task: Omit<ProjectTask, 'id'>) => {
-    setTasks(prev => [...prev, { ...task, id: Date.now().toString() }]);
+  const handleRegister = async (name: string, loginStr: string, pass: string) => {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, login: loginStr, password: pass })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erreur d'inscription");
+    setCurrentUser(data);
   };
 
-  const updateTaskStatus = (taskId: string, status: ProjectTask['status']) => {
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status } : t));
+  const handleLogout = () => setCurrentUser(null);
+
+  const updateUserRole = async (userId: string, role: string) => {
+    const res = await fetch(`/api/users/${userId}/role`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role })
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: updated.role } : u));
+    }
   };
 
-  const sendMessage = (msg: Omit<Message, 'id' | 'timestamp'>) => {
-    setMessages(prev => [...prev, { ...msg, id: Date.now().toString(), timestamp: new Date().toISOString() }]);
+  const addGrade = async (grade: Omit<Grade, 'id'>) => {
+    const res = await fetch('/api/grades', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(grade)
+    });
+    if (res.ok) {
+      const newGrade = await res.json();
+      setGrades(prev => [...prev, newGrade]);
+    }
   };
 
-  const assignPoToClass = (poId: string, classId: string) => {
-    setUsers(prev => prev.map(u => u.id === poId ? { ...u, classId } : u));
+  const toggleAttendance = async (sessionId: string, studentId: string) => {
+    const res = await fetch('/api/attendance/toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId, studentId })
+    });
+    if (res.ok) await fetchData();
+  };
+
+  const addTask = async (task: Omit<ProjectTask, 'id'>) => {
+    const res = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(task)
+    });
+    if (res.ok) {
+      const newTask = await res.json();
+      setTasks(prev => [...prev, newTask]);
+    }
+  };
+
+  const updateTaskStatus = async (taskId: string, status: ProjectTask['status']) => {
+    const res = await fetch(`/api/tasks/${taskId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setTasks(prev => prev.map(t => t.id === taskId ? updated : t));
+    }
+  };
+
+  const deleteTask = async (taskId: string) => {
+    const res = await fetch(`/api/tasks/${taskId}`, {
+      method: 'DELETE'
+    });
+    if (res.ok) {
+      setTasks(prev => prev.filter(t => t.id !== taskId));
+    }
+  };
+
+  const sendMessage = async (msg: Omit<Message, 'id' | 'timestamp'>) => {
+    const res = await fetch('/api/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg)
+    });
+    if (res.ok) {
+      const newMsg = await res.json();
+      setMessages(prev => [...prev, newMsg]);
+    }
+  };
+
+  const assignPoToClass = async (poId: string, classId: string) => {
+    const res = await fetch(`/api/users/${poId}/assign`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ classId })
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setUsers(prev => prev.map(u => u.id === poId ? { ...u, classId: updated.classId } : u));
+    }
+  };
+
+  const seedDb = async () => {
+    const res = await fetch('/api/seed', { method: 'POST' });
+    if (res.ok) {
+      await fetchData();
+    }
   };
 
   return (
     <AppContext.Provider value={{
-      activeRole,
       currentUser,
-      setActiveRole,
       users,
       courses,
       grades,
@@ -177,12 +273,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       documents,
       tasks,
       messages,
+      handleLogin,
+      handleRegister,
+      handleLogout,
+      updateUserRole,
       addGrade,
       toggleAttendance,
       addTask,
       updateTaskStatus,
+      deleteTask,
       sendMessage,
-      assignPoToClass
+      assignPoToClass,
+      seedDb
     }}>
       {children}
     </AppContext.Provider>

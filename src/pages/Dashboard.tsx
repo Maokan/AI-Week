@@ -3,23 +3,31 @@ import { useAppContext } from '../context/AppContext';
 import { GraduationCap, Library, Users, FolderOpen } from 'lucide-react';
 
 export const Dashboard = () => {
-  const { activeRole, currentUser, grades, courses, users } = useAppContext();
+  const { currentUser, grades, courses, users, seedDb } = useAppContext();
 
   return (
     <div>
-      <h1 className="card-title" style={{ fontSize: '1.5rem', marginBottom: '24px' }}>
-        Bienvenue, {currentUser?.name}
-      </h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h1 className="card-title" style={{ fontSize: '1.5rem', margin: 0 }}>
+          Bienvenue, {currentUser?.name || "Utilisateur"}
+        </h1>
+        <button className="btn btn-outline" onClick={async () => { await seedDb(); alert("Base de données initialisée !"); }}>
+          Initialiser les données (DB Seed)
+        </button>
+      </div>
       
       <div className="grid-cards">
         {/* ELEVE Stats */}
-        {activeRole === 'ELEVE' && (
+        {currentUser?.role === 'ELEVE' && (
           <>
             <div className="card">
               <div className="card-title"><GraduationCap size={20} /> Moyenne Générale</div>
               <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                {(grades.filter(g => g.studentId === currentUser?.id).reduce((acc, curr) => acc + curr.value, 0) / 
-                 (grades.filter(g => g.studentId === currentUser?.id).length || 1)).toFixed(2)} / 20
+                {(() => {
+                  const myGrades = grades.filter(g => g.studentId === currentUser?.id);
+                  if (myGrades.length === 0) return "-- / 20";
+                  return (myGrades.reduce((acc, curr) => acc + curr.value, 0) / myGrades.length).toFixed(2) + " / 20";
+                })()}
               </p>
             </div>
             <div className="card">
@@ -30,7 +38,7 @@ export const Dashboard = () => {
         )}
 
         {/* PO Stats */}
-        {activeRole === 'PO' && (
+        {currentUser?.role === 'PO' && (
           <>
             <div className="card">
                <div className="card-title"><Users size={20} /> Élèves de ma classe</div>
@@ -48,7 +56,7 @@ export const Dashboard = () => {
         )}
         
         {/* Others */}
-        {(activeRole === 'TUTEUR' || activeRole === 'DIRECTION') && (
+        {(currentUser?.role === 'TUTEUR' || currentUser?.role === 'DIRECTION') && (
            <div className="card">
              <div className="card-title"><FolderOpen size={20} /> Espace de travail</div>
              <p>Consultez les menus sur la gauche pour gérer vos projets et affectations.</p>
