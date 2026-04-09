@@ -7,7 +7,7 @@ import './Schedule.css';
 import type { ScheduleSession } from '../context/AppContext';
 
 export const Schedule = () => {
-  const { currentUser, schedule, courses, users, attendance, toggleAttendance, addCourse, addScheduleSession } = useAppContext();
+  const { currentUser, schedule, courses, users, attendance, toggleAttendance, addCourse, addScheduleSession, deleteScheduleSession } = useAppContext();
   
   // Modals state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -25,7 +25,8 @@ export const Schedule = () => {
 
   const getSessions = () => {
     if (currentUser?.role === 'ELEVE') {
-      return schedule.filter(s => s.classId === currentUser?.classId);
+      const actualEleve = users.find(u => u.id === currentUser.id);
+      return schedule.filter(s => s.classId === actualEleve?.classId);
     }
     if (currentUser?.role === 'PO') {
       return schedule.filter(s => s.poId === currentUser?.id);
@@ -161,12 +162,20 @@ export const Schedule = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Classe destinataire</label>
-                <select className="form-control" required value={selectedClassId} onChange={e => setSelectedClassId(e.target.value)}>
-                  <option value="">-- Choisir une classe --</option>
+                <select 
+                  className="form-control" 
+                  required 
+                  value={selectedClassId} 
+                  onChange={e => setSelectedClassId(e.target.value)}
+                >
+                  <option value="">-- Choisir une classe (définie par Administration) --</option>
                   {classIds.map(id => (
                     <option key={id} value={id}>{id}</option>
                   ))}
                 </select>
+                {classIds.length === 0 && (
+                  <small style={{ color: 'var(--danger, #dc3545)' }}>La direction n'a encore défini aucune classe.</small>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Date</label>
@@ -197,7 +206,23 @@ export const Schedule = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Détails du cours</h2>
-              <button className="close-btn" onClick={() => setSelectedSession(null)}><X size={24} /></button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {currentUser?.role === 'PO' && (
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ padding: '6px 12px', fontSize: '0.875rem', color: 'var(--danger, #dc3545)', borderColor: 'var(--danger-light, #f8d7da)' }}
+                    onClick={async () => {
+                      if (confirm("Êtes-vous sûr de vouloir supprimer ce cours ?")) {
+                        await deleteScheduleSession(selectedSession.id);
+                        setSelectedSession(null);
+                      }
+                    }}
+                  >
+                    🗑️ Supprimer le cours
+                  </button>
+                )}
+                <button className="close-btn" onClick={() => setSelectedSession(null)}><X size={24} /></button>
+              </div>
             </div>
             
             <div style={{ marginBottom: '24px' }}>

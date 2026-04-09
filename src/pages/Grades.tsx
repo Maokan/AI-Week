@@ -51,7 +51,7 @@ export const Grades = () => {
 
   // PO View
   if (currentUser?.role === 'PO') {
-    const classStudents = users.filter(u => u.role === 'ELEVE' && u.classId === currentUser?.classId);
+    const classStudents = users.filter(u => u.role === 'ELEVE');
     
     const handleAdd = (e: React.FormEvent) => {
       e.preventDefault();

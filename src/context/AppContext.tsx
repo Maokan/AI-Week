@@ -85,12 +85,13 @@ interface AppContextType {
   addGrade: (grade: Omit<Grade, 'id'>) => Promise<void>;
   addCourse: (course: Omit<Course, 'id' | 'pdfUrl'>) => Promise<Course>;
   addScheduleSession: (session: Omit<ScheduleSession, 'id'>) => Promise<void>;
+  deleteScheduleSession: (sessionId: string) => Promise<void>;
   toggleAttendance: (sessionId: string, studentId: string) => Promise<void>;
   addTask: (task: Omit<ProjectTask, 'id'>) => Promise<void>;
   updateTaskStatus: (taskId: string, status: ProjectTask['status']) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   sendMessage: (msg: Omit<Message, 'id' | 'timestamp'>) => Promise<void>;
-  assignPoToClass: (poId: string, classId: string) => Promise<void>;
+  assignUserClass: (userId: string, classId: string) => Promise<void>;
   seedDb: () => Promise<void>;
 }
 
@@ -217,6 +218,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const deleteScheduleSession = async (sessionId: string) => {
+    const res = await fetch(`/api/schedule/${sessionId}`, {
+      method: 'DELETE'
+    });
+    if (res.ok) {
+      setSchedule(prev => prev.filter(s => s.id !== sessionId));
+    }
+  };
+
   const toggleAttendance = async (sessionId: string, studentId: string) => {
     const res = await fetch('/api/attendance/toggle', {
       method: 'POST',
@@ -271,15 +281,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const assignPoToClass = async (poId: string, classId: string) => {
-    const res = await fetch(`/api/users/${poId}/assign`, {
+  const assignUserClass = async (userId: string, classId: string) => {
+    const res = await fetch(`/api/users/${userId}/assign`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ classId })
     });
     if (res.ok) {
       const updated = await res.json();
-      setUsers(prev => prev.map(u => u.id === poId ? { ...u, classId: updated.classId } : u));
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, classId: updated.classId } : u));
     }
   };
 
@@ -307,13 +317,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       updateUserRole,
       addCourse,
       addScheduleSession,
+      deleteScheduleSession,
       addGrade,
       toggleAttendance,
       addTask,
       updateTaskStatus,
       deleteTask,
       sendMessage,
-      assignPoToClass,
+      assignUserClass,
       seedDb
     }}>
       {children}

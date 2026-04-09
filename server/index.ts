@@ -130,6 +130,18 @@ app.post('/api/schedule', async (req, res) => {
   }
 });
 
+app.delete('/api/schedule/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Supprimer les présences (attendances) liées d'abord pour éviter l'erreur de contrainte Prisma
+    await prisma.attendance.deleteMany({ where: { sessionId: id } });
+    await prisma.scheduleSession.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete schedule session' });
+  }
+});
+
 app.get('/api/attendance', async (req, res) => {
   const attendance = await prisma.attendance.findMany();
   res.json(attendance);
