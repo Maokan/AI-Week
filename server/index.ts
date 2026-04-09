@@ -82,6 +82,18 @@ app.get('/api/courses', async (req, res) => {
   res.json(courses);
 });
 
+app.post('/api/courses', async (req, res) => {
+  try {
+    const { title, poId } = req.body;
+    const course = await prisma.course.create({
+      data: { title, poId }
+    });
+    res.json(course);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create course' });
+  }
+});
+
 // Grades Routes
 app.get('/api/grades', async (req, res) => {
   const grades = await prisma.grade.findMany();
@@ -104,6 +116,18 @@ app.post('/api/grades', async (req, res) => {
 app.get('/api/schedule', async (req, res) => {
   const schedule = await prisma.scheduleSession.findMany();
   res.json(schedule);
+});
+
+app.post('/api/schedule', async (req, res) => {
+  try {
+    const { courseId, startTime, endTime, poId, classId } = req.body;
+    const session = await prisma.scheduleSession.create({
+      data: { courseId, startTime: new Date(startTime), endTime: new Date(endTime), poId, classId }
+    });
+    res.json(session);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create schedule session' });
+  }
 });
 
 app.get('/api/attendance', async (req, res) => {

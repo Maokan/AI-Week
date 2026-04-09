@@ -1,0 +1,160 @@
+.schedule-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.calendar-wrapper {
+  flex: 1;
+  background: var(--bg-hover);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 600px;
+}
+
+.calendar-days-header {
+  display: grid;
+  grid-template-columns: 60px repeat(5, 1fr);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-main);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.calendar-time-col {
+  width: 60px;
+}
+
+.calendar-day-header {
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  border-left: 1px solid var(--border-color);
+}
+
+.calendar-body {
+  display: grid;
+  grid-template-columns: 60px repeat(5, 1fr);
+  flex: 1;
+  position: relative;
+  overflow-y: auto;
+}
+
+.calendar-time-labels {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color);
+}
+
+.time-label {
+  height: 60px; /* 1 hour = 60px */
+  text-align: right;
+  padding-right: 8px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  transform: translateY(-0.5rem);
+}
+
+.calendar-day-column {
+  position: relative;
+  border-right: 1px solid var(--border-color);
+  background: var(--bg-main);
+}
+
+/* Background grid lines */
+.calendar-day-column::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: linear-gradient(to bottom, var(--border-color) 1px, transparent 1px);
+  background-size: 100% 60px; /* match .time-label height */
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.session-block {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  background: linear-gradient(135deg, rgba(58, 123, 253, 0.9), rgba(144, 56, 255, 0.9));
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: white;
+  font-size: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+  z-index: 5;
+}
+
+.session-block:hover {
+  transform: scale(1.02);
+  z-index: 6;
+}
+
+.session-title {
+  font-weight: bold;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.session-time {
+  opacity: 0.8;
+  font-size: 0.65rem;
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--bg-main);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 500px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: var(--text-color);
+}

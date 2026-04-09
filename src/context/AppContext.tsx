@@ -83,6 +83,8 @@ interface AppContextType {
   updateUserRole: (userId: string, role: string) => Promise<void>;
 
   addGrade: (grade: Omit<Grade, 'id'>) => Promise<void>;
+  addCourse: (course: Omit<Course, 'id' | 'pdfUrl'>) => Promise<Course>;
+  addScheduleSession: (session: Omit<ScheduleSession, 'id'>) => Promise<void>;
   toggleAttendance: (sessionId: string, studentId: string) => Promise<void>;
   addTask: (task: Omit<ProjectTask, 'id'>) => Promise<void>;
   updateTaskStatus: (taskId: string, status: ProjectTask['status']) => Promise<void>;
@@ -189,6 +191,32 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addCourse = async (course: Omit<Course, 'id' | 'pdfUrl'>) => {
+    const res = await fetch('/api/courses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(course)
+    });
+    if (res.ok) {
+      const newCourse = await res.json();
+      setCourses(prev => [...prev, newCourse]);
+      return newCourse;
+    }
+    throw new Error('Failed to create course');
+  };
+
+  const addScheduleSession = async (session: Omit<ScheduleSession, 'id'>) => {
+    const res = await fetch('/api/schedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(session)
+    });
+    if (res.ok) {
+      const newSession = await res.json();
+      setSchedule(prev => [...prev, newSession]);
+    }
+  };
+
   const toggleAttendance = async (sessionId: string, studentId: string) => {
     const res = await fetch('/api/attendance/toggle', {
       method: 'POST',
@@ -277,6 +305,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       handleRegister,
       handleLogout,
       updateUserRole,
+      addCourse,
+      addScheduleSession,
       addGrade,
       toggleAttendance,
       addTask,
