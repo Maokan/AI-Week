@@ -1,0 +1,36 @@
+# Contexte du Projet & Cahier des Charges
+
+## Stack Technique Principale
+- **Front-end / Application** : React Native
+- **Base de Données** : PostgreSQL
+
+## Objectif Principal
+Développer une plateforme scolaire centralisée permettant aux étudiants et au personnel d'interagir, de gérer leur scolarité et de suivre l'avancement de leurs projets.
+
+## Fonctionnalités Principales (Core Features)
+1. **Gestion Scolaire**
+   - Centralisation et consultation des notes.
+   - Accès à l'emploi du temps.
+   - Système de gestion des appels (présences/absences).
+
+2. **Ressources Pédagogiques (Cours)**
+   - Page dédiée pour retrouver tous les cours.
+   - Fonctionnalité de visionneuse intégrée (consulter les cours sans téléchargement obligatoire).
+   - Option de téléchargement classique disponible.
+   - Espace dédié dans la page cours pour ajouter/renseigner des documents.
+
+3. **Suivi de Projet**
+   - Page dédiée au suivi de l'avancement des projets de groupe.
+
+4. **Communication**
+   - Espace d'échange et de messagerie avec les différents membres du personnel encadrant (PO, tuteur, direction) et les membres du groupe de travail.
+
+## Fonctionnalités Optionnelles / Bonus (Systèmes Avancés & IA)
+1. **Agent IA Intégré**
+   - Génération automatique du tableau de suivi des projets.
+   - Assignation automatique des élèves dans des groupes de travail.
+   - Assistance et guide conversationnel pour les utilisateurs naviguant sur l'application.
+
+2. **Système de Notifications**
+   - Système de rappel par email lorsqu'une échéance de remise de document/projet approche.
+   - Système de notification automatique par email lors d'un événement clé (ex: mise à jour, nouveau message, etc.).
