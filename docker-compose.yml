@@ -2,9 +2,13 @@ services:
   web:
     build: .
     ports:
-      - "3000:3000"
+      - "5173:5173"
+      - "3001:3001"
     environment:
       - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ai_week_db?schema=public
+    depends_on:
+      - db
   
   db:
     image: postgres:14
