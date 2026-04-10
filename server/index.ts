@@ -265,6 +265,10 @@ app.put('/api/users/:id/role', async (req, res) => {
 
 // Removed generic /api/seed intentionally to match UI removal
 
-app.listen(PORT, () => {
-  console.log(`Express server running on http://localhost:${PORT}`);
-});
+export { app, prisma };
+
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Express server running on http://localhost:${PORT}`);
+  });
+}

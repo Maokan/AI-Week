@@ -44,4 +44,4 @@
 1. **Priorité Sécurité** : Implémenter JWT et des middlewares d'authentification pour sécuriser les routes `/api`.
 2. **Identité Visuelle** : Adopter une bibliothèque comme **Shadcn/UI** ou **Tailwind** pour donner un aspect premium et professionnel rapidement.
 3. **Prouver le nom "AI"** : Intégrer une première fonctionnalité IA simple (ex: résumé automatique des messages ou aide à la rédaction de feedbacks pour les grades).
-4. **Assurance Qualité** : Initialiser **Vitest** pour tester au moins la logique métier du backend.
+4. **Assurance Qualité** : Vitest est maintenant initialisé. La prochaine étape est d'étendre la couverture de tests à la logique de planning et de messagerie.
