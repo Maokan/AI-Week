@@ -5,12 +5,21 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 const connectionString = process.env.DATABASE_URL || 'postgresql://postgresql:postgresql@localhost:5432/ai_week_db?schema=public';
 const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"]
+  }
+});
 const prisma = new PrismaClient({ adapter });
 const PORT = process.env.PORT || 3001;
 
@@ -33,6 +42,18 @@ bootstrapAdmin();
 
 app.use(cors());
 app.use(express.json());
+
+// Broadcast 'dataUpdated' event after any successful mutating request
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method) && res.statusCode >= 200 && res.statusCode < 300) {
+      if (req.path.startsWith('/api/') && req.path !== '/api/login' && req.path !== '/api/register') {
+        io.emit('dataUpdated', { method: req.method, path: req.path });
+      }
+    }
+  });
+  next();
+});
 
 // Auth Routes
 app.post('/api/register', async (req, res) => {
@@ -265,6 +286,6 @@ app.put('/api/users/:id/role', async (req, res) => {
 
 // Removed generic /api/seed intentionally to match UI removal
 
-app.listen(PORT, () => {
-  console.log(`Express server running on http://localhost:${PORT}`);
+httpServer.listen(PORT, () => {
+  console.log(`Express server with WS running on http://localhost:${PORT}`);
 });
