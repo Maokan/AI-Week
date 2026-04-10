@@ -52,7 +52,8 @@ classDiagram
 
 Le modèle de données représente la structure réelle des tables dans la base de données PostgreSQL, telle que définie par le schéma Prisma.
 
-```mermaiderDiagram
+```mermaid
+erDiagram
     USER ||--o{ GRADE : "receives"
     USER ||--o{ COURSE : "manages (PO)"
     USER ||--o{ SESSION : "teaches (PO)"
