@@ -33,7 +33,7 @@ export const Auth = () => {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px', color: 'var(--primary)' }}>
           <GraduationCap size={48} />
         </div>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px' }}>EduPlatform</h1>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px' }}>CTRL+A</h1>
         <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>
           {isLogin ? 'Connectez-vous à votre compte' : 'Créez votre compte étudiant'}
         </p>

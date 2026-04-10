@@ -57,7 +57,7 @@ export const Layout = () => {
       <aside className="sidebar">
         <div className="sidebar-header">
           <GraduationCap size={28} />
-          <span>EduPlatform</span>
+          <span>CTRL+A</span>
         </div>
         
         <nav className="sidebar-nav">
