@@ -23,7 +23,7 @@ Via une configuration du GitHub, la partie Workflow, un fichier de propriétés 
 
 ### Base de données 
 
-Le système de Base de Données choisis pour ce projet est Postgres, il est nécessaire que Postgres soit installé sur la machine et avec la commande  
+Le système de Base de Données choisis pour ce projet est Postgres, il est nécessaire que Postgres soit installé sur la machine. pour Mettre à Jour la base de donnée il faut effectuer la commande :  
 
 ` yarn prisma db push `  
 

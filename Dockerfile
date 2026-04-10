@@ -19,5 +19,5 @@ RUN yarn prisma generate
 # use ports for Vite and Express
 EXPOSE 5173 3001
 
-# launch command
-CMD ["yarn", "run", "dev"] 
+# Push the DB schema before starting dev so a new machine doesn't crash on empty tables
+CMD ["sh", "-c", "yarn prisma db push && yarn run dev"] 
