@@ -1,77 +1,51 @@
-# React + TypeScript + Vite
+# Ceci est la Documentation du projet “CTRL+A”, contenant l’installation, le lancement et le fonctionnement de celui-ci 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ 
 
-Currently, two official plugins are available:
+## INITIALISATION DU PROJET 
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### Docker 
 
-## React Compiler
+Le projet s’exécute dans un environnement Docker, il est nécessaire que Docker soit installé sur la machine (https://www.docker.com/products/docker-desktop/). 
+Le projet contient un Dockerfile et un docker-compose-yml, pour exécuter le projet il faut entrer la commande  
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+` docker compose up ` 
 
-## 🚀 Project Architecture
+À la racine du projet. Pour éteindre le container il faut effectuer la commande : 
+` docker compose down ` 
+ 
 
-For a detailed breakdown of the application layers, responsibilities, and technology stack, please refer to our **[Architecture Documentation](docs/architecture.md)**.
+### Pipeline 
 
-## Expanding the ESLint configuration
+Via une configuration du GitHub, la partie Workflow, un fichier de propriétés pour SonarQube et un Dockerfile, à chaque fois qu’un push est effectué, le code est récupéré par SonarQube et est analysé afin de trouver de possibles failles de sécurités ou duplicata de code avant d’être envoyé à Docker pour qu’il soit conteneurisé afin de pouvoir être utilisé par n’importe qui possédant Docker. 
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+ 
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Base de données 
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Le système de Base de Données choisis pour ce projet est Postgres, il est nécessaire que Postgres soit installé sur la machine et avec la commande  
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+` yarn prisma db push `  
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+La base de données est push directement sur le serveur local Postgres.  
+ 
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ACCESSIBILITÉ 
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Chaque page en dehors de la page d’accueil nécessite de se connecter avec son compte CTRL+A. Chaque connexion créera un token qui une fois expiré déconnectera l’utilisateur. Si un utilisateur essaye d’accéder à une page sans s’être connecté avant, il sera redirigé vers la page de connexion. 
+
+ 
+
+## FONCTIONNEMENT DU PROJET 
+Le site web est accessible à l’adresse [http://localhost:5173] une fois que le docker est lancé. 
+ 
+
+### Initialisation des données 
+
+Pour créer un utilisateur, il suffit de l’enregistrer avec la page de création de comptes. 
+
+Pour configurer l’utilisateur, le compte admin à une page unique permettant de modifier la configuration de chaque utilisateur. 
+
+Pour créer un cours, seul un utilisateur “PO” peut créer un cours sur la page emploie du temps, indiquant la classe, le nom du cours et les horaires. L’utilisateur étudiant pourra le voir sur son emploi du temps, ainsi que sa présence, qui devra être confirmé par le PO via le système d’appel. 
+
+Pour ajouter une note, le PO peut attribuer une note à un élève qui va mettre à jour automatiquement sa moyenne et l’élève pourra la voir directement sur la page correspondante.  
