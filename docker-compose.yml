@@ -7,9 +7,6 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/ai_week_db?schema=public
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       - db
   

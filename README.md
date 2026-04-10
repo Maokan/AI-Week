@@ -14,6 +14,10 @@ Le projet contient un Dockerfile et un docker-compose-yml, pour exécuter le pro
 À la racine du projet. Pour éteindre le container il faut effectuer la commande : 
 ` docker compose down ` 
  
+## Dépendances
+pour installer les dépendances il faut effectuer la commande : 
+
+` yarn install `  
 
 ### Pipeline 
 
@@ -34,7 +38,6 @@ La base de données est push directement sur le serveur local Postgres.
 
 Chaque page en dehors de la page d’accueil nécessite de se connecter avec son compte CTRL+A. Chaque connexion créera un token qui une fois expiré déconnectera l’utilisateur. Si un utilisateur essaye d’accéder à une page sans s’être connecté avant, il sera redirigé vers la page de connexion. 
 
- 
 
 ## FONCTIONNEMENT DU PROJET 
 Le site web est accessible à l’adresse [http://localhost:5173] une fois que le docker est lancé. 
