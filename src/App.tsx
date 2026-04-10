@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { type ReactNode } from 'react';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { Layout } from './components/Layout';
 
@@ -15,7 +16,7 @@ import { Auth } from './pages/Auth';
 import { Landing } from './pages/landing';
 
 // Component to protect authenticated routes
-const ProtectedRoute = ({ element }: { element: JSX.Element }) => {
+const ProtectedRoute = ({ element }: { element: ReactNode }) => {
   const { currentUser } = useAppContext();
   return currentUser ? element : <Navigate to="/login" replace />;
 };

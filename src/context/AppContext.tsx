@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { io } from 'socket.io-client';
 
 // Types
 export type Role = 'ELEVE' | 'PO' | 'TUTEUR' | 'DIRECTION';
@@ -139,6 +140,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (currentUser) {
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       fetchData();
+      
+      // Connect to WebSocket using the backend's explicit port since Vite runs on 5173
+      const socket = io('http://localhost:3001');
+      socket.on('dataUpdated', (data) => {
+        console.log('Real-time update triggered by:', data);
+        fetchData();
+      });
+
+      return () => {
+        socket.disconnect();
+      };
     } else {
       localStorage.removeItem('currentUser');
     }
